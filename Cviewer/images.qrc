@@ -1,2 +1,8 @@
-<RCC/>
-
+<RCC>
+    <qresource prefix="/images">
+        <file>images/magnifying-glass-2x.png</file>
+        <file>images/folder-2x.png</file>
+        <file>images/sort-ascending-2x.png</file>
+        <file>images/eye-2x.png</file>
+    </qresource>
+</RCC>
