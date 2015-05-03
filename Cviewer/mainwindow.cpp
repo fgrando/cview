@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QListWidgetItem>
 #include <QProcess>
+#include <QRegExp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,14 +16,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    QString path = QDir::currentPath();
+    currentPath = QDir::currentPath();
     rootPath = QDir::rootPath();
     outputFile = "/tmp/output";
+    viewer = NULL;
 
     model->setRootPath(rootPath);
     model->setReadOnly(true);
     ui->fileSystemTreeView->setModel(model);
-    QModelIndex idx = model->index(rootPath);
+    QModelIndex idx = model->index(currentPath);
     itemSelected(idx);
 
 /*
@@ -41,11 +43,20 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, SLOT(showClickedDir(QModelIndex)));
     QObject::connect(ui->fileSystemTreeView, SIGNAL(clicked(QModelIndex)),
                      this, SLOT(resizeOnClick()));
-    QObject::connect(ui->actionPath, SIGNAL(triggered(bool)),
-                     this, SLOT(setupUserInput()));
-    QObject::connect(ui->actionShowGraph, SIGNAL(triggered(bool)),
-                     this, SLOT(openViewer()));
 
+    QObject::connect(ui->actionPath, SIGNAL(triggered(bool)),
+                     this, SLOT(focusToUserInput()));
+    QObject::connect(ui->actionShowGraph, SIGNAL(triggered(bool)),
+                     this, SLOT(viewerOpen()));
+    QObject::connect(ui->actionGenerate, SIGNAL(triggered(bool)),
+                     this, SLOT(generateGraph()));
+
+    QObject::connect(ui->lineEditFilter, SIGNAL(textChanged(QString)),
+                     this, SLOT(functionListFilter(QString)));
+    QObject::connect(ui->pushButtonAll, SIGNAL(clicked(bool)),
+                     this, SLOT(functionListSelectedAll()));
+    QObject::connect(ui->pushButtonNone, SIGNAL(clicked(bool)),
+                     this, SLOT(functionListSelectedNone()));
 
 }
 
@@ -54,14 +65,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::updateFileTreeRoot()
 {
     QFileInfo file(ui->lineEditRootPath->text());
 
     if (!file.exists()) {
         ui->lineEditRootPath->setText(rootPath);
-        setupUserInput();
+        focusToUserInput();
         return;
     }
 
@@ -104,13 +114,13 @@ void MainWindow::resizeOnClick()
     qDebug() << "resizing collumn";
 }
 
-void MainWindow::setupUserInput()
+void MainWindow::focusToUserInput()
 {
     ui->lineEditRootPath->setFocus();
     ui->lineEditRootPath->selectAll();
 }
 
-void MainWindow::checkFunctionSelection(QListWidgetItem *item)
+void MainWindow::functionListSelectedChanged(QListWidgetItem *item)
 {
     qDebug() << item->text() << " selection changed! " << item->checkState();
 
@@ -128,20 +138,88 @@ void MainWindow::checkFunctionSelection(QListWidgetItem *item)
         excludedFunctions.append(item->text());
     }
 
-    qDebug() << "generating " << outputFile;
-    generateGraph(currentFile, excludedFunctions, outputFile);
-
+    generateGraph();
+    viewerOpen();
 }
 
-void MainWindow::openViewer()
+void MainWindow::generateGraph()
 {
-    showGraph(outputFile+"0.pdf");
+    qDebug() << "generating " << outputFile;
+    generateGraph(currentFile, excludedFunctions, outputFile);
+}
+
+void MainWindow::functionListFilter(QString text)
+{
+    QRegExp exp(text);
+    int len = ui->listWidgetFunctions->count();
+    for (int i = 0; i < len; ++i) {
+        if (ui->listWidgetFunctions->item(i)->text().contains(exp) ||
+            text == "") {
+            ui->listWidgetFunctions->item(i)->setHidden(false);
+        } else {
+            ui->listWidgetFunctions->item(i)->setHidden(true);
+        }
+    }
+}
+
+void MainWindow::functionListSelectedAll()
+{
+    QObject::disconnect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
+    excludedFunctions.clear();
+
+    int len = ui->listWidgetFunctions->count();
+    for (int i = 0; i < len; ++i)
+        ui->listWidgetFunctions->item(i)->setCheckState(Qt::Checked);
+
+    QObject::connect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
+    generateGraph();
+    viewerOpen();
+}
+
+void MainWindow::functionListSelectedNone()
+{
+    QObject::disconnect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
+
+    excludedFunctions.clear();
+
+    int len = ui->listWidgetFunctions->count();
+    for (int i = 0; i < len; ++i) {
+        ui->listWidgetFunctions->item(i)->setCheckState(Qt::Unchecked);
+        excludedFunctions.append(ui->listWidgetFunctions->item(i)->text());
+    }
+
+    QObject::connect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
+    generateGraph();
+    viewerOpen();
+}
+
+void MainWindow::viewerOpen()
+{
+    if (viewer == NULL)
+        showGraph(outputFile+"0.pdf");
+    else
+        qDebug() << "already opened";
+}
+
+void MainWindow::viewerClosed(int ret)
+{
+    QObject::disconnect(this->viewer, SIGNAL(finished(int)),
+                        this, SLOT(viewerClosed(int)));
+
+    qDebug() << "Viewer closed. Return " << ret;
+
+    delete viewer;
+    viewer = NULL;
 }
 
 void MainWindow::fillFunctionsPanel(QStringList functions)
 {
     QObject::disconnect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
-                     this, SLOT(checkFunctionSelection(QListWidgetItem*)));
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
 
     ui->listWidgetFunctions->clear();
     excludedFunctions.clear();
@@ -154,7 +232,7 @@ void MainWindow::fillFunctionsPanel(QStringList functions)
     }
 
     QObject::connect(ui->listWidgetFunctions, SIGNAL(itemChanged(QListWidgetItem*)),
-                     this, SLOT(checkFunctionSelection(QListWidgetItem*)));
+                     this, SLOT(functionListSelectedChanged(QListWidgetItem*)));
 }
 
 
@@ -237,11 +315,15 @@ bool MainWindow::showGraph(QString filePath)
 {
     qDebug() << "showing " << filePath;
 
-    QString program = "/usr/bin/evince";
+    QString program = "/usr/bin/evince"; //TODO: non portable
     QStringList arguments;
     arguments.append(filePath);
 
-    QProcess::startDetached(program, arguments);
+    viewer = new QProcess(this);
+    viewer->start(program, arguments);
+    QObject::connect(this->viewer, SIGNAL(finished(int)),
+                     this, SLOT(viewerClosed(int)));
+
     return true;
 }
 

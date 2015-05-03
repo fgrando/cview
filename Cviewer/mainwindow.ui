@@ -6,48 +6,72 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
+    <width>540</width>
     <height>661</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>cflow-gui</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/images/images/fork-8x.png</normaloff>:/images/images/fork-8x.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="4" column="0">
+     <widget class="QListWidget" name="listWidgetFunctions"/>
+    </item>
     <item row="0" column="0">
      <widget class="QLineEdit" name="lineEditRootPath"/>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QLabel" name="labelFunctions">
       <property name="text">
-       <string>Functions in file:</string>
+       <string>Selected functions to show:</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="6" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="pushButtonAll">
         <property name="text">
-         <string>All</string>
+         <string>&amp;All</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonNone">
         <property name="text">
-         <string>None</string>
+         <string>&amp;None</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="3" column="0">
-     <widget class="QListWidget" name="listWidgetFunctions"/>
-    </item>
     <item row="1" column="0">
      <widget class="QTreeView" name="fileSystemTreeView"/>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLineEdit" name="lineEditFilter">
+      <property name="placeholderText">
+       <string>Filter (regular expression)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -56,7 +80,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>419</width>
+     <width>540</width>
      <height>27</height>
     </rect>
    </property>
@@ -69,8 +93,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPath"/>
-   <addaction name="separator"/>
-   <addaction name="actionLoad_File_Functions"/>
+   <addaction name="actionGenerate"/>
    <addaction name="actionShowGraph"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -87,20 +110,7 @@
     <string>Change Path</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
-   </property>
-  </action>
-  <action name="actionLoad_File_Functions">
-   <property name="icon">
-    <iconset>
-     <normalon>:/images/images/sort-ascending-2x.png</normalon>
-    </iconset>
-   </property>
-   <property name="text">
-    <string>Load File Functions</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>Alt+E</string>
    </property>
   </action>
   <action name="actionShowGraph">
@@ -116,11 +126,29 @@
     <string>Show Graph as PDF</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Alt+S</string>
+   </property>
+  </action>
+  <action name="actionGenerate">
+   <property name="icon">
+    <iconset>
+     <normalon>:/images/images/share-boxed-2x.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Generate</string>
+   </property>
+   <property name="toolTip">
+    <string>Generate Graph</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -4,5 +4,15 @@
         <file>images/folder-2x.png</file>
         <file>images/sort-ascending-2x.png</file>
         <file>images/eye-2x.png</file>
+        <file>images/cog-2x.png</file>
+        <file>images/fork-8x.png</file>
+        <file>images/layers-2x.png</file>
+        <file>images/loop-circular-2x.png</file>
+        <file>images/play-circle-2x.png</file>
+        <file>images/project-2x.png</file>
+        <file>images/puzzle-piece-2x.png</file>
+        <file>images/reload-2x.png</file>
+        <file>images/share-boxed-2x.png</file>
+        <file>images/wrench-2x.png</file>
     </qresource>
 </RCC>

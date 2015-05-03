@@ -7,6 +7,7 @@
 #include <QModelIndex>
 #include <QListWidgetItem>
 #include <QStringList>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -31,26 +32,34 @@ private:
     Ui::MainWindow *ui;
     QFileSystemModel *model;
     QString rootPath;
-    void processFile(QString path);
-    void fillFunctionsPanel(QStringList functions);
-
     QStringList excludedFunctions;
+    QString currentPath;
+    QString currentFile;
+    QString outputFile;
+    QProcess *viewer;
+
     QStringList loadFileFunctions(QString path);
+    void fillFunctionsPanel(QStringList functions);
     QStringList nonSelectedFunctions();
     bool generateGraph(QString inFilePath, QStringList excludedFunctions, QString outFilePath);
     bool showGraph(QString filePath);
 
-    QString currentFile;
-    QString outputFile;
 
 public slots:
     void updateFileTreeRoot();
     void itemSelected(QModelIndex idx);
     void showClickedDir(QModelIndex idx);
     void resizeOnClick();
-    void setupUserInput();
-    void checkFunctionSelection(QListWidgetItem *item);
-    void openViewer();
+    void focusToUserInput();
+
+    void functionListFilter(QString text);
+    void functionListSelectedAll();
+    void functionListSelectedNone();
+    void functionListSelectedChanged(QListWidgetItem *item);
+
+    void generateGraph();
+    void viewerOpen();
+    void viewerClosed(int ret);
 };
 
 #endif // MAINWINDOW_H
