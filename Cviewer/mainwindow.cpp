@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QString>
 #include <QDebug>
 #include <QModelIndex>
@@ -8,6 +9,7 @@
 #include <QListWidgetItem>
 #include <QProcess>
 #include <QRegExp>
+#include <QCoreApplication>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,7 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     currentPath = QDir::currentPath();
     rootPath = QDir::rootPath();
-    outputFile = "/tmp/output";
+    outputFile = "/tmp/output" +
+                 QString::number(QCoreApplication::applicationPid()) +
+                 ".pdf";
     viewer = NULL;
 
     model->setRootPath(rootPath);
@@ -57,7 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, SLOT(functionListSelectedAll()));
     QObject::connect(ui->pushButtonNone, SIGNAL(clicked(bool)),
                      this, SLOT(functionListSelectedNone()));
-
 }
 
 MainWindow::~MainWindow()
@@ -105,7 +108,7 @@ void MainWindow::showClickedDir(QModelIndex idx)
 {
     QFileInfo file = model->fileInfo(idx);
     if (file.isDir())
-        qDebug() << "abrir a pasta: " << file.absoluteFilePath();
+        qDebug() << "open folder: " << file.absoluteFilePath();
 }
 
 void MainWindow::resizeOnClick()
@@ -122,7 +125,7 @@ void MainWindow::focusToUserInput()
 
 void MainWindow::functionListSelectedChanged(QListWidgetItem *item)
 {
-    qDebug() << item->text() << " selection changed! " << item->checkState();
+    qDebug() << " selection changed!";
 
     if (item->checkState() == Qt::Checked) {
         for (int i = 0; i < excludedFunctions.size(); i++) {
@@ -134,17 +137,19 @@ void MainWindow::functionListSelectedChanged(QListWidgetItem *item)
         }
 
     } else {
-        qDebug() << "adding " << item->text();
+        //qDebug() << "adding " << item->text();
         excludedFunctions.append(item->text());
     }
 
-    generateGraph();
-    viewerOpen();
+    if (ui->checkBoxRefresh->isChecked()) {
+        generateGraph();
+        viewerOpen();
+    }
 }
 
 void MainWindow::generateGraph()
 {
-    qDebug() << "generating " << outputFile;
+    qDebug() << "generate graph";
     generateGraph(currentFile, excludedFunctions, outputFile);
 }
 
@@ -200,7 +205,7 @@ void MainWindow::functionListSelectedNone()
 void MainWindow::viewerOpen()
 {
     if (viewer == NULL)
-        showGraph(outputFile+"0.pdf");
+        showGraph(outputFile);
     else
         qDebug() << "already opened";
 }
@@ -225,7 +230,7 @@ void MainWindow::fillFunctionsPanel(QStringList functions)
     excludedFunctions.clear();
 
     foreach (QString str, functions) {
-        qDebug() << "adding " << str;
+        //qDebug() << "adding " << str;
         QListWidgetItem *item = new QListWidgetItem(str, ui->listWidgetFunctions);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
         item->setCheckState(Qt::Checked); // AND initialize check state
@@ -260,7 +265,7 @@ QStringList MainWindow::loadFileFunctions(QString path)
         QString tmp = line.split(' ')[0];
         if (tmp != "") {
             functions.append(tmp);
-            qDebug() << tmp;
+            //qDebug() << tmp;
         }
     }
 
@@ -306,7 +311,12 @@ bool MainWindow::generateGraph(QString inFilePath, QStringList excludedFunctions
 
     QString ret = QString::fromStdString(pycflow2dot->readAllStandardOutput().toStdString());
 
-    qDebug() << ret;
+    //qDebug() << ret;
+    QFileInfo f(outFilePath);
+    if (f.exists())
+        qDebug() << "generated " << outFilePath;
+    else
+        qDebug() << "ERROR! pycflow2dot.py did not generate file";
 
     return true;
 }

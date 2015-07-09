@@ -25,20 +25,62 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="0">
-     <widget class="QListWidget" name="listWidgetFunctions"/>
-    </item>
-    <item row="0" column="0">
+    <item row="0" column="0" colspan="2">
      <widget class="QLineEdit" name="lineEditRootPath"/>
     </item>
-    <item row="3" column="0">
+    <item row="1" column="0" colspan="2">
+     <widget class="QTreeView" name="fileSystemTreeView"/>
+    </item>
+    <item row="2" column="0" rowspan="2" colspan="2">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1" rowspan="2">
+     <widget class="QCheckBox" name="checkBoxRefresh">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>100</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>Auto refresh</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
      <widget class="QLabel" name="labelFunctions">
       <property name="text">
        <string>Selected functions to show:</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="0">
+    <item row="5" column="0" colspan="2">
+     <widget class="QListWidget" name="listWidgetFunctions"/>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <widget class="QLineEdit" name="lineEditFilter">
+      <property name="placeholderText">
+       <string>Filter (regular expression)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="pushButtonAll">
@@ -56,23 +98,6 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <widget class="QTreeView" name="fileSystemTreeView"/>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLineEdit" name="lineEditFilter">
-      <property name="placeholderText">
-       <string>Filter (regular expression)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -81,7 +106,7 @@
      <x>0</x>
      <y>0</y>
      <width>540</width>
-     <height>27</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>
