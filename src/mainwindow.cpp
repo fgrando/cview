@@ -306,10 +306,15 @@ bool MainWindow::generateGraph(QString inFilePath, QStringList excludedFunctions
     arguments.append("-o");
     arguments.append(outFilePath);
 
+    qDebug() << "cmd" << program << arguments;
+
     pycflow2dot->start(program, arguments);
     pycflow2dot->waitForFinished(30000);
 
     QString ret = QString::fromStdString(pycflow2dot->readAllStandardOutput().toStdString());
+
+    /* pycflow2dot adiciona o 0.pdf */
+    QFile::rename(outFilePath+"0.pdf", outFilePath);
 
     //qDebug() << ret;
     QFileInfo f(outFilePath);
