@@ -255,14 +255,15 @@ QStringList MainWindow::loadFileFunctions(QString path)
     QStringList functions;
 
     program = "cflow";
-    arguments.append("-x");
+    //arguments.append("-x");
     arguments.append(path);
     cflow->start(program, arguments);
     cflow->waitForFinished(30000);
 
     QStringList lines = QString::fromStdString(cflow->readAllStandardOutput().toStdString()).split('\n');
     foreach (QString line, lines) {
-        QString tmp = line.split(' ')[0];
+        QString tmp = line.trimmed();
+        tmp = tmp.split('(')[0];
         if (tmp != "") {
             functions.append(tmp);
             //qDebug() << tmp;
@@ -296,6 +297,9 @@ bool MainWindow::generateGraph(QString inFilePath, QStringList excludedFunctions
         file.close();
     }
 
+    QFile outFile(outFilePath);
+    qDebug() << "removed" << outFilePath << outFile.remove();
+
     program = "./pycflow2dot.py"; //TODO: non portable
     arguments.append("-i");
     arguments.append(inFilePath);
@@ -312,9 +316,12 @@ bool MainWindow::generateGraph(QString inFilePath, QStringList excludedFunctions
     pycflow2dot->waitForFinished(30000);
 
     QString ret = QString::fromStdString(pycflow2dot->readAllStandardOutput().toStdString());
+    if (!ret.contains("pdf produced successfully from dot"))
+        qDebug() << "Could not generate the pdf.";
 
     /* pycflow2dot adiciona o 0.pdf */
-    QFile::rename(outFilePath+"0.pdf", outFilePath);
+    QString pycflowOutputName = outFilePath+"0.pdf";
+    qDebug() << QFile::rename(pycflowOutputName, outFilePath);
 
     //qDebug() << ret;
     QFileInfo f(outFilePath);
