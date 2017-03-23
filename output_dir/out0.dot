@@ -1,0 +1,23 @@
+digraph G {
+node [peripheries=2 style="filled,rounded" fontname="Vera Sans Mono" color="#eecc80"];
+rankdir=LR;
+label="input.c"
+main [shape=box];
+addition[label="addition\n1" color="#eecc80" shape=ellipse];
+
+scanf[label="scanf" color="#eecc80" shape=ellipse];
+
+main[label="main\n12" color="#eecc80" shape=box];
+
+printf[label="printf" color="#eecc80" shape=ellipse];
+
+edge [color="#000000"];
+
+main->addition
+edge [color="#000000"];
+
+main->scanf
+edge [color="#000000"];
+
+main->printf
+}

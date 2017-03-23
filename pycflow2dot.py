@@ -19,6 +19,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+#changed some stuff to make it run in windows
+
+import os
 import sys
 import argparse
 import subprocess
@@ -30,7 +33,7 @@ try:
 except:
     pydot = None
 
-debug_msg_verbosity = 0
+debug_msg_verbosity = 1
 def dprint(verbosity, s):
     """Debug mode printing."""
     #TODO make this a package
@@ -364,12 +367,12 @@ def write_graphs2dot(graphs, c_fnames, img_fname, for_latex, multi_page, layout)
     return dot_paths
 
 def check_cflow_dot_availability():
+    # required = ['cflow', 'dot'] must be in the same folder of this script
     required = ['cflow', 'dot']
-    
+    paths = [os.path.dirname(os.path.abspath(__file__)) + "/cflow.exe", os.path.dirname(os.path.abspath(__file__)) + "/graphviz-2.38/release/bin/dot.exe"]
     dep_paths = []
     for dependency in required:
-        path = subprocess.check_output(['which', dependency] )
-        path = bytes2str(path)
+        path = paths[required.index(dependency)]
         
         if path.find(dependency) < 0:
             raise Exception(dependency +' not found in $PATH.')
@@ -377,7 +380,7 @@ def check_cflow_dot_availability():
             path = path.replace('\n', '')
             print('found ' +dependency +' at: ' +path)
             dep_paths += [path]
-    
+            
     return dep_paths
 
 def dot2img(dot_paths, img_format, layout):
@@ -493,7 +496,7 @@ def main():
     
     # input
     (cflow, dot) = check_cflow_dot_availability()
-    
+
     args = parse_args()
     
     c_fnames = args.input_filenames
